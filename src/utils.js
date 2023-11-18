@@ -1,4 +1,4 @@
-import { Source } from "./components/Source";
+import { DataSource } from "./components/DataSource";
 
 /*
 Returns a Source component encapsulating the "slept under a mosquito net" data per district
@@ -20,5 +20,5 @@ export const getMosquitoDataSource = (data) => {
     }),
   };
 
-  return Source("geojson", "mosquitoSource", newGeojson);
+  return DataSource("geojson", "mosquitoSource", newGeojson);
 };
