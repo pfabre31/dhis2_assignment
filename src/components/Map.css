@@ -1,7 +1,5 @@
 .map-overlay {
   position: absolute;
-  bottom: 2rem;
-  right: 2rem;
   background: rgba(254, 255, 255, 0.79);
   font-family: Arial, sans-serif;
   overflow: auto;
@@ -12,9 +10,14 @@
 #legend-container {
   padding: 10px;
   line-height: 18px;
-  height: 20vh;
+  height: fit-content;
   margin-bottom: 40px;
   width: 18vw;
+}
+
+.legend {
+  bottom: 2rem;
+  right: 2rem;
 }
 
 .legend-key {
@@ -39,4 +42,21 @@
   font-family: "Roboto", "sans-serif";
   max-width: 18vw;
   text-align: center;
+}
+
+#info-box {
+  padding: 1rem;
+  top: 5.3rem;
+  right: 2rem;
+  max-width: 30vw;
+}
+.map-title {
+  text-align: center;
+  font-weight: normal;
+}
+
+#mosquito-proportion {
+  margin-top: 3rem;
+  margin-left: 1.5rem;
+  font-size: 1.3rem;
 }

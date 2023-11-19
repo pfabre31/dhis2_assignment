@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import mapboxgl from "!mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import "./Map.css";
@@ -12,6 +12,7 @@ export const Map = (props) => {
   const map = useRef(null);
   const valueGroups = ["46-52.4", "52.4-76.1", "76.1-94.8"]; //Using Jenkins discretization
   const colorGradient = ["#FFDD00", "#D88124", "#AB1212"];
+  let [districtBeingHovered, setDistrictBeingHovered] = useState(null);
 
   useEffect(() => {
     if (map.current) return;
@@ -28,10 +29,12 @@ export const Map = (props) => {
       map.current.addControl(
         new mapboxgl.ScaleControl({ position: "bottom-left" })
       );
+      setUpHoverEvent();
     });
   });
 
   const addLayer = () => {
+    console.log(props.dataSources["mosquito"]);
     const mosquitoSource = props.dataSources["mosquito"];
     const mosquitoLayer = Layer("mosquito-layer-1", "fill", "mosquitoSource", {
       "fill-color": {
@@ -45,6 +48,7 @@ export const Map = (props) => {
           [94.8, "#AB1212"],
         ],
       },
+
       "fill-outline-color": "black",
     });
     map.current.addSource(mosquitoSource.name, {
@@ -73,6 +77,33 @@ export const Map = (props) => {
     });
   };
 
+  const setUpHoverEvent = () => {
+    map.current.on("mousemove", "mosquito-layer-1", (e) => {
+      if (
+        e.features.length > 0 &&
+        e.features[0].properties.name !== districtBeingHovered?.properties.name
+      ) {
+        setDistrictBeingHovered(e.features[0]);
+        map.current.getCanvas().style.cursor = "pointer";
+        map.current.setFeatureState(
+          { source: "mosquitoSource", id: e.features[0].id },
+          { hover: true }
+        );
+      }
+    });
+
+    map.current.on("mouseleave", "mosquito-layer-1", (e) => {
+      console.log("mouseleave");
+      if (districtBeingHovered)
+        map.current.setFeatureState(
+          { source: "mosquitoSource", id: districtBeingHovered.id },
+          { hover: false }
+        );
+      setDistrictBeingHovered(null);
+      map.current.getCanvas().style.cursor = "";
+    });
+  };
+
   return (
     <>
       <div
@@ -80,11 +111,21 @@ export const Map = (props) => {
         className="map-container"
         style={{ width: "100%", height: "100%" }}
       />
-      <div className="legend map-overlay">
-        <div className="legend-title">
-          Proportion of district population that slept under a mosquito net last
-          night (%)
+      <div className="map-overlay" id="info-box">
+        <h2 className="map-title">
+          Proportion of Sierra Leone district population that slept under a
+          mosquito net last night{" "}
+        </h2>
+        <div id="mosquito-proportion">
+          <p>
+            {districtBeingHovered
+              ? `${districtBeingHovered.properties.name} ${districtBeingHovered.properties.SUAMNLN} %`
+              : "Hover a district to see individual values"}
+          </p>
         </div>
+      </div>
+      <div className="legend map-overlay">
+        <div className="legend-title">Proportion per district (%)</div>
         <div id="legend-container"></div>
       </div>
     </>
