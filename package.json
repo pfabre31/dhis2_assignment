@@ -11,7 +11,10 @@
     "deploy": "d2-app-scripts deploy"
   },
   "devDependencies": {
-    "@dhis2/cli-app-scripts": "^10.3.10"
+    "@babel/preset-env": "^7.23.3",
+    "@babel/preset-react": "^7.23.3",
+    "@dhis2/cli-app-scripts": "^10.3.10",
+    "@testing-library/react": "12"
   },
   "dependencies": {
     "@dhis2/app-runtime": "^3.9.4",

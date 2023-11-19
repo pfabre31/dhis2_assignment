@@ -1,18 +1,24 @@
 import React, { useRef, useEffect, useState } from "react";
-import mapboxgl from "!mapbox-gl";
+import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import "./Map.css";
 mapboxgl.accessToken =
   "pk.eyJ1IjoibGFpc3NlcGF1bCIsImEiOiJjam5ocTByd2gwZjU2M3BvM3R5NndidThkIn0.DZIEmZkAfnn7s3fTWv0JHA";
-
 import { Layer } from "./Layer";
 
 export const Map = (props) => {
-  const mapContainer = useRef(null);
   const map = useRef(null);
-  const valueGroups = ["46-52.4", "52.4-76.1", "76.1-94.8"]; //Using Jenkins discretization
-  const colorGradient = ["#FFDD00", "#D88124", "#AB1212"];
-  let [districtBeingHovered, setDistrictBeingHovered] = useState(null);
+  const mapContainer = useRef(null);
+  let [featureBeingHovered, setFeatureBeingHovered] = useState(null);
+  //Using Jenkins discretization
+  let [discretizationStops, setDiscretizationStops] = useState([
+    46, 52.4, 76.1, 94.8,
+  ]);
+  let [colorGradient, setColorGradient] = useState([
+    "#FFDD00",
+    "#D88124",
+    "#AB1212",
+  ]);
 
   useEffect(() => {
     if (map.current) return;
@@ -34,18 +40,17 @@ export const Map = (props) => {
   });
 
   const addLayer = () => {
-    console.log(props.dataSources["mosquito"]);
     const mosquitoSource = props.dataSources["mosquito"];
     const mosquitoLayer = Layer("mosquito-layer-1", "fill", "mosquitoSource", {
       "fill-color": {
         property: "SUAMNLN",
         stops: [
-          [46, "#FFDD00"],
-          [52.4, "#FFDD00"],
-          [52.41, "#D88124"],
-          [76.1, "#D88124"],
-          [76.11, "#AB1212"],
-          [94.8, "#AB1212"],
+          [discretizationStops[0], colorGradient[0]],
+          [discretizationStops[1], colorGradient[0]],
+          [discretizationStops[1] + 0.001, colorGradient[1]],
+          [discretizationStops[2], colorGradient[1]],
+          [discretizationStops[2] + 0.001, colorGradient[2]],
+          [discretizationStops[3], colorGradient[2]],
         ],
       },
 
@@ -61,8 +66,11 @@ export const Map = (props) => {
   const drawLegend = () => {
     const legend = document.getElementById("legend-container");
 
-    valueGroups.forEach((group, i) => {
+    discretizationStops.forEach((v, i) => {
+      if (i === discretizationStops.length - 1) return false;
+      const group = `${v} - ${discretizationStops[i + 1]}`;
       const color = colorGradient[i];
+
       const item = document.createElement("div");
       item.classList.add("legend-item");
       const key = document.createElement("span");
@@ -71,6 +79,7 @@ export const Map = (props) => {
 
       const value = document.createElement("span");
       value.innerHTML = `${group}`;
+
       item.appendChild(key);
       item.appendChild(value);
       legend.appendChild(item);
@@ -81,25 +90,15 @@ export const Map = (props) => {
     map.current.on("mousemove", "mosquito-layer-1", (e) => {
       if (
         e.features.length > 0 &&
-        e.features[0].properties.name !== districtBeingHovered?.properties.name
+        e.features[0].properties.name !== featureBeingHovered?.properties.name
       ) {
-        setDistrictBeingHovered(e.features[0]);
+        setFeatureBeingHovered(e.features[0]);
         map.current.getCanvas().style.cursor = "pointer";
-        map.current.setFeatureState(
-          { source: "mosquitoSource", id: e.features[0].id },
-          { hover: true }
-        );
       }
     });
 
     map.current.on("mouseleave", "mosquito-layer-1", (e) => {
-      console.log("mouseleave");
-      if (districtBeingHovered)
-        map.current.setFeatureState(
-          { source: "mosquitoSource", id: districtBeingHovered.id },
-          { hover: false }
-        );
-      setDistrictBeingHovered(null);
+      setFeatureBeingHovered(null);
       map.current.getCanvas().style.cursor = "";
     });
   };
@@ -113,13 +112,13 @@ export const Map = (props) => {
       />
       <div className="map-overlay" id="info-box">
         <h2 className="map-title">
-          Proportion of Sierra Leone district population that slept under a
-          mosquito net last night{" "}
+          Sierra Leone district population having slept under a mosquito net
+          last night{" "}
         </h2>
         <div id="mosquito-proportion">
           <p>
-            {districtBeingHovered
-              ? `${districtBeingHovered.properties.name} ${districtBeingHovered.properties.SUAMNLN} %`
+            {featureBeingHovered
+              ? `${featureBeingHovered.properties.name} ${featureBeingHovered.properties.SUAMNLN} %`
               : "Hover a district to see individual values"}
           </p>
         </div>

@@ -5,6 +5,7 @@ Returns a Source component encapsulating the "slept under a mosquito net" data p
 in Sierra Leone. 
 **/
 export const getMosquitoDataSource = (data) => {
+  console.log(data);
   //We add the "slept under a mosquito net" property to the geojson
   const newGeojson = {
     ...data.geojson,

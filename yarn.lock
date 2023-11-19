@@ -993,7 +993,7 @@
     "@babel/helper-create-regexp-features-plugin" "^7.22.15"
     "@babel/helper-plugin-utils" "^7.22.5"
 
-"@babel/preset-env@^7.11.0", "@babel/preset-env@^7.12.1", "@babel/preset-env@^7.14.7", "@babel/preset-env@^7.16.4":
+"@babel/preset-env@^7.11.0", "@babel/preset-env@^7.12.1", "@babel/preset-env@^7.14.7", "@babel/preset-env@^7.16.4", "@babel/preset-env@^7.23.3":
   version "7.23.3"
   resolved "https://registry.yarnpkg.com/@babel/preset-env/-/preset-env-7.23.3.tgz#d299e0140a7650684b95c62be2db0ef8c975143e"
   integrity sha512-ovzGc2uuyNfNAs/jyjIGxS8arOHS5FENZaNn4rtE7UdKMMkqHCvboHfcuhWLZNX5cB44QfcGNWjaevxMzzMf+Q==
@@ -1088,7 +1088,7 @@
     "@babel/types" "^7.4.4"
     esutils "^2.0.2"
 
-"@babel/preset-react@^7.0.0", "@babel/preset-react@^7.12.5", "@babel/preset-react@^7.16.0":
+"@babel/preset-react@^7.0.0", "@babel/preset-react@^7.12.5", "@babel/preset-react@^7.16.0", "@babel/preset-react@^7.23.3":
   version "7.23.3"
   resolved "https://registry.yarnpkg.com/@babel/preset-react/-/preset-react-7.23.3.tgz#f73ca07e7590f977db07eb54dbe46538cc015709"
   integrity sha512-tbkHOS9axH6Ysf2OUEqoSZ6T3Fa2SrNH6WTWSPBboxKzdxNc9qOICeLXkNG0ZEwbQ1HY8liwOce4aN/Ceyuq6w==
@@ -2768,7 +2768,7 @@
     lz-string "^1.5.0"
     pretty-format "^27.0.2"
 
-"@testing-library/react@^12.1.2":
+"@testing-library/react@12", "@testing-library/react@^12.1.2":
   version "12.1.5"
   resolved "https://registry.yarnpkg.com/@testing-library/react/-/react-12.1.5.tgz#bb248f72f02a5ac9d949dea07279095fa577963b"
   integrity sha512-OfTXCJUFgjd/digLUuPxa0+/3ZxsQmE7ub9kcbW/wi96Bh3o/p5vrETcBGfP17NWPGqeYYl5LTRpwyGoMC4ysg==
