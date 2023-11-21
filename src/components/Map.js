@@ -1,24 +1,33 @@
 import React, { useRef, useEffect, useState } from "react";
 import mapboxgl from "mapbox-gl";
+import { Layer } from "./Layer";
+import { jenks } from "simple-statistics";
 import "mapbox-gl/dist/mapbox-gl.css";
 import "./Map.css";
+
 mapboxgl.accessToken =
   "pk.eyJ1IjoibGFpc3NlcGF1bCIsImEiOiJjam5ocTByd2gwZjU2M3BvM3R5NndidThkIn0.DZIEmZkAfnn7s3fTWv0JHA";
-import { Layer } from "./Layer";
 
 export const Map = (props) => {
   const map = useRef(null);
   const mapContainer = useRef(null);
   let [featureBeingHovered, setFeatureBeingHovered] = useState(null);
-  //Using Jenkins discretization
-  let [discretizationStops, setDiscretizationStops] = useState([
-    46, 52.4, 76.1, 94.8,
-  ]);
-  let [colorGradient, setColorGradient] = useState([
-    "#FFDD00",
-    "#D88124",
-    "#AB1212",
-  ]);
+
+  //Should be changed according to data
+  const discretizationNbOfGroups = 3;
+
+  let [discretizationStops, setDiscretizationStops] = useState(
+    jenks(
+      props.dataSources["mosquito"].data.features
+        .map((f) => f.properties.SUAMNLN)
+        .sort(),
+      discretizationNbOfGroups
+    )
+  );
+  let [colorGradient, setColorGradient] = useState({
+    "yellow-red": ["#FFDD00", "#D88124", "#AB1212"],
+    blues: ["#cad6f6", "#567db6", "#171778"],
+  });
 
   useEffect(() => {
     if (map.current) return;
@@ -45,12 +54,12 @@ export const Map = (props) => {
       "fill-color": {
         property: "SUAMNLN",
         stops: [
-          [discretizationStops[0], colorGradient[0]],
-          [discretizationStops[1], colorGradient[0]],
-          [discretizationStops[1] + 0.001, colorGradient[1]],
-          [discretizationStops[2], colorGradient[1]],
-          [discretizationStops[2] + 0.001, colorGradient[2]],
-          [discretizationStops[3], colorGradient[2]],
+          [discretizationStops[0], colorGradient["blues"][0]],
+          [discretizationStops[1], colorGradient["blues"][0]],
+          [discretizationStops[1] + 0.1, colorGradient["blues"][1]],
+          [discretizationStops[2], colorGradient["blues"][1]],
+          [discretizationStops[2] + 0.1, colorGradient["blues"][2]],
+          [discretizationStops[3], colorGradient["blues"][2]],
         ],
       },
 
@@ -68,8 +77,8 @@ export const Map = (props) => {
 
     discretizationStops.forEach((v, i) => {
       if (i === discretizationStops.length - 1) return false;
-      const group = `${v} - ${discretizationStops[i + 1]}`;
-      const color = colorGradient[i];
+      const dataRangeLabel = `${v} - ${discretizationStops[i + 1]}`;
+      const color = colorGradient["blues"][i];
 
       const item = document.createElement("div");
       item.classList.add("legend-item");
@@ -78,7 +87,7 @@ export const Map = (props) => {
       key.style.backgroundColor = color;
 
       const value = document.createElement("span");
-      value.innerHTML = `${group}`;
+      value.innerHTML = `${dataRangeLabel}`;
 
       item.appendChild(key);
       item.appendChild(value);

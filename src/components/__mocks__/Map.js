@@ -1,18 +1,27 @@
 import React from "react";
+import { jenks } from "simple-statistics";
 
 /* Only legend and map hover logic is tested as all the rest relies on Mapbox internal logic**/
-const Map = () => {
+const Map = ({ props }) => {
   const map = React.useRef(null);
   const mapContainer = React.useRef(null);
   let [featureBeingHovered, setFeatureBeingHovered] = React.useState(null);
-  let [discretizationStops, setDiscretizationStops] = React.useState([
-    46, 52.4, 76.1, 94.8,
-  ]);
-  let [colorGradient, setColorGradient] = React.useState([
-    "#FFDD00",
-    "#D88124",
-    "#AB1212",
-  ]);
+
+  //Should be changed according to data
+  const discretizationNbOfGroups = 3;
+
+  let [discretizationStops, setDiscretizationStops] = React.useState(
+    jenks(
+      props.dataSources["mosquito"].data.features
+        .map((f) => f.properties.SUAMNLN)
+        .sort(),
+      discretizationNbOfGroups
+    )
+  );
+  let [colorGradient, setColorGradient] = React.useState({
+    "yellow-red": ["#FFDD00", "#D88124", "#AB1212"],
+    blues: ["#cad6f6", "#567db6", "#171778"],
+  });
 
   React.useEffect(() => {
     drawLegend();
@@ -24,7 +33,7 @@ const Map = () => {
     discretizationStops.forEach((v, i) => {
       if (i === discretizationStops.length - 1) return;
       const group = `${v} - ${discretizationStops[i + 1]}`;
-      const color = colorGradient[i];
+      const color = colorGradient["blues"][i];
       const item = document.createElement("div");
       item.classList.add("legend-item");
       const key = document.createElement("span");

@@ -1,28 +1,62 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import Map from "./__mocks__/Map";
 import React from "react";
+import { jenks } from "simple-statistics";
 
 jest.mock("./Map");
 
+const mockInputData = {
+  dataSources: {
+    mosquito: {
+      data: {
+        features: [
+          { properties: { SUAMNLN: 40 } },
+          { properties: { SUAMNLN: 42 } },
+          { properties: { SUAMNLN: 48 } },
+          { properties: { SUAMNLN: 76 } },
+          { properties: { SUAMNLN: 90 } },
+          { properties: { SUAMNLN: 91 } },
+          { properties: { SUAMNLN: 92 } },
+          { properties: { SUAMNLN: 92.1 } },
+          { properties: { SUAMNLN: 99.8 } },
+        ],
+      },
+    },
+  },
+};
+
+//Should be changed according to data
+const discretizationNbOfGroups = 3;
+
 describe("Legend", () => {
   beforeAll(() => {
-    render(<Map props={{ dataSources: { mosquito: "fake-geojson" } }} />);
+    render(<Map props={mockInputData} />);
   });
 
   test("legend is drawn with the correct values", () => {
     const legend = screen.getByTestId("legend");
     const legendItems = legend.childNodes[1].childNodes;
+    const discretizationStops = jenks(
+      mockInputData.dataSources.mosquito.data.features.map(
+        (f) => f.properties.SUAMNLN
+      ),
+      discretizationNbOfGroups
+    );
 
-    expect(legendItems[0].childNodes[1].innerHTML).toBe("46 - 52.4");
-    expect(legendItems[1].childNodes[1].innerHTML).toBe("52.4 - 76.1");
-    expect(legendItems[2].childNodes[1].innerHTML).toBe("76.1 - 94.8");
+    expect(legendItems[0].childNodes[1].innerHTML).toBe(
+      `${discretizationStops[0]} - ${discretizationStops[1]}`
+    );
+    expect(legendItems[1].childNodes[1].innerHTML).toBe(
+      `${discretizationStops[1]} - ${discretizationStops[2]}`
+    );
+    expect(legendItems[2].childNodes[1].innerHTML).toBe(
+      `${discretizationStops[2]} - ${discretizationStops[3]}`
+    );
   });
 });
 describe("Map", () => {
   describe("On mouse move event", () => {
-    beforeEach(() =>
-      render(<Map props={{ dataSources: { mosquito: "fake-geojson" } }} />)
-    );
+    beforeEach(() => render(<Map props={mockInputData} />));
     describe("when no feature is hovered", () => {
       test("user is still invited to hover the map", () => {
         const mapEl = screen.getAllByTestId("map")[0];
@@ -76,9 +110,7 @@ describe("Map", () => {
   });
 
   describe("On mouse leave event", () => {
-    beforeEach(() =>
-      render(<Map props={{ dataSources: { mosquito: "fake-geojson" } }} />)
-    );
+    beforeEach(() => render(<Map props={mockInputData} />));
     test("user is invited to hover the map again", () => {
       const mapEl = screen.getAllByTestId("map")[0];
 
