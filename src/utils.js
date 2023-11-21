@@ -13,8 +13,8 @@ export const getMosquitoDataSource = (data) => {
         ...f,
         properties: {
           ...f.properties,
-          //SUAMNLN = Slept under a mosquito net last night
-          SUAMNLN: parseFloat(data.values.rows.find((e) => e[1] === f.id)[2]),
+          //SUAMN = Sleep under a mosquito net
+          SUAMN: parseFloat(data.values.rows.find((e) => e[1] === f.id)[2]),
         },
       };
     }),

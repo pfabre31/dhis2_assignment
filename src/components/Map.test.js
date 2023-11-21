@@ -3,6 +3,8 @@ import Map from "./__mocks__/Map";
 import React from "react";
 import { jenks } from "simple-statistics";
 
+/* Only legend and map hover logic is tested as all the rest relies on Mapbox internal logic**/
+
 jest.mock("./Map");
 
 const mockInputData = {
@@ -10,15 +12,15 @@ const mockInputData = {
     mosquito: {
       data: {
         features: [
-          { properties: { SUAMNLN: 40 } },
-          { properties: { SUAMNLN: 42 } },
-          { properties: { SUAMNLN: 48 } },
-          { properties: { SUAMNLN: 76 } },
-          { properties: { SUAMNLN: 90 } },
-          { properties: { SUAMNLN: 91 } },
-          { properties: { SUAMNLN: 92 } },
-          { properties: { SUAMNLN: 92.1 } },
-          { properties: { SUAMNLN: 99.8 } },
+          { properties: { SUAMN: 40 } },
+          { properties: { SUAMN: 42 } },
+          { properties: { SUAMN: 48 } },
+          { properties: { SUAMN: 76 } },
+          { properties: { SUAMN: 90 } },
+          { properties: { SUAMN: 91 } },
+          { properties: { SUAMN: 92 } },
+          { properties: { SUAMN: 92.1 } },
+          { properties: { SUAMN: 99.8 } },
         ],
       },
     },
@@ -38,7 +40,7 @@ describe("Legend", () => {
     const legendItems = legend.childNodes[1].childNodes;
     const discretizationStops = jenks(
       mockInputData.dataSources.mosquito.data.features.map(
-        (f) => f.properties.SUAMNLN
+        (f) => f.properties.SUAMN
       ),
       discretizationNbOfGroups
     );
@@ -63,7 +65,7 @@ describe("Map", () => {
 
         fireEvent.mouseMove(mapEl, {
           target: {
-            features: [],
+            // features: [],
           },
         });
         const infoBoxEl = screen.getAllByTestId("infobox")[0];
@@ -79,7 +81,7 @@ describe("Map", () => {
 
           fireEvent.mouseMove(mapEl, {
             target: {
-              features: [{ properties: { name: "Oslo", SUAMNLN: 45 } }],
+              features: [{ properties: { name: "Oslo", SUAMN: 45 } }],
             },
           });
           const infoBoxEl = screen.getAllByTestId("infobox")[0];
@@ -89,10 +91,8 @@ describe("Map", () => {
     });
     describe("when a different feature was hovered before", () => {
       test("new name and data are displayed in the info box", () => {
-        const stubInitialState = [
-          { properties: { name: "Oslo", SUAMNLN: 45 } },
-        ];
-
+        //Update the component's state value
+        const stubInitialState = [{ properties: { name: "Oslo", SUAMN: 45 } }];
         jest
           .spyOn(React, "useState")
           .mockImplementationOnce(() => React.useState(stubInitialState));
@@ -100,7 +100,7 @@ describe("Map", () => {
         const mapEl = screen.getAllByTestId("map")[0];
         fireEvent.mouseMove(mapEl, {
           target: {
-            features: [{ properties: { name: "Göteborg", SUAMNLN: 85 } }],
+            features: [{ properties: { name: "Göteborg", SUAMN: 85 } }],
           },
         });
         const infoBoxEl = screen.getAllByTestId("infobox")[0];

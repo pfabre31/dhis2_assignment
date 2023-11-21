@@ -1,5 +1,11 @@
 This project was bootstrapped with [DHIS2 Application Platform](https://github.com/dhis2/app-platform).
 
+## About
+
+This is a web map representing the proportion of population sleeping under a mosquito net
+at night.
+The date of the survey and the number of people surveyed are missing.
+
 ## Available Scripts
 
 In the project directory, you can run:

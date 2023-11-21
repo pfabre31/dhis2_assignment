@@ -1,7 +1,6 @@
 import React from "react";
 import { jenks } from "simple-statistics";
 
-/* Only legend and map hover logic is tested as all the rest relies on Mapbox internal logic**/
 const Map = ({ props }) => {
   const map = React.useRef(null);
   const mapContainer = React.useRef(null);
@@ -13,7 +12,7 @@ const Map = ({ props }) => {
   let [discretizationStops, setDiscretizationStops] = React.useState(
     jenks(
       props.dataSources["mosquito"].data.features
-        .map((f) => f.properties.SUAMNLN)
+        .map((f) => f.properties.SUAMN)
         .sort(),
       discretizationNbOfGroups
     )
@@ -50,6 +49,7 @@ const Map = ({ props }) => {
 
   const handleMouseMove = (e) => {
     if (
+      e.target.features &&
       e.target.features.length > 0 &&
       e.target.features[0].properties.name !==
         featureBeingHovered?.properties.name
@@ -74,13 +74,12 @@ const Map = ({ props }) => {
       />
       <div className="map-overlay" id="info-box">
         <h2 className="map-title">
-          Sierra Leone district population having slept under a mosquito net
-          last night{" "}
+          Sierra Leone population sleeping under a mosquito net at night{" "}
         </h2>
         <div data-testid="infobox" id="mosquito-proportion">
           <p>
             {featureBeingHovered
-              ? `${featureBeingHovered.properties.name} ${featureBeingHovered.properties.SUAMNLN}%`
+              ? `${featureBeingHovered.properties.name} ${featureBeingHovered.properties.SUAMN}%`
               : "Hover a district to see individual values"}
           </p>
         </div>

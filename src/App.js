@@ -25,7 +25,7 @@ const MyApp = () => (
   <div className={classes.container}>
     <DataQuery query={query}>
       {({ error, loading, data }) => {
-        if (error) return <span>ERROR</span>;
+        if (error) return <span>{error}</span>;
         if (loading) return <span>...</span>;
         return (
           <>

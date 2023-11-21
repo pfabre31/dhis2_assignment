@@ -19,13 +19,13 @@ export const Map = (props) => {
   let [discretizationStops, setDiscretizationStops] = useState(
     jenks(
       props.dataSources["mosquito"].data.features
-        .map((f) => f.properties.SUAMNLN)
+        .map((f) => f.properties.SUAMN)
         .sort(),
       discretizationNbOfGroups
     )
   );
   let [colorGradient, setColorGradient] = useState({
-    "yellow-red": ["#FFDD00", "#D88124", "#AB1212"],
+    "yellow-red": ["#ffdd00", "#d88124", "#ab1212"],
     blues: ["#cad6f6", "#567db6", "#171778"],
   });
 
@@ -39,7 +39,7 @@ export const Map = (props) => {
       zoom: 7,
     });
     map.current.on("load", () => {
-      addLayer();
+      addMosquitoNetLayer();
       drawLegend();
       map.current.addControl(
         new mapboxgl.ScaleControl({ position: "bottom-left" })
@@ -48,11 +48,11 @@ export const Map = (props) => {
     });
   });
 
-  const addLayer = () => {
+  const addMosquitoNetLayer = () => {
     const mosquitoSource = props.dataSources["mosquito"];
     const mosquitoLayer = Layer("mosquito-layer-1", "fill", "mosquitoSource", {
       "fill-color": {
-        property: "SUAMNLN",
+        property: "SUAMN",
         stops: [
           [discretizationStops[0], colorGradient["blues"][0]],
           [discretizationStops[1], colorGradient["blues"][0]],
@@ -77,11 +77,13 @@ export const Map = (props) => {
 
     discretizationStops.forEach((v, i) => {
       if (i === discretizationStops.length - 1) return false;
+
       const dataRangeLabel = `${v} - ${discretizationStops[i + 1]}`;
       const color = colorGradient["blues"][i];
 
       const item = document.createElement("div");
       item.classList.add("legend-item");
+
       const key = document.createElement("span");
       key.className = "legend-key";
       key.style.backgroundColor = color;
@@ -91,13 +93,16 @@ export const Map = (props) => {
 
       item.appendChild(key);
       item.appendChild(value);
+
       legend.appendChild(item);
     });
   };
 
   const setUpHoverEvent = () => {
     map.current.on("mousemove", "mosquito-layer-1", (e) => {
+      //Checking that a feature is hovered and that it is not already being hovered
       if (
+        e.features &&
         e.features.length > 0 &&
         e.features[0].properties.name !== featureBeingHovered?.properties.name
       ) {
@@ -121,13 +126,12 @@ export const Map = (props) => {
       />
       <div className="map-overlay" id="info-box">
         <h2 className="map-title">
-          Sierra Leone district population having slept under a mosquito net
-          last night{" "}
+          Sierra Leone population sleeping under a mosquito net at night{" "}
         </h2>
         <div id="mosquito-proportion">
           <p>
             {featureBeingHovered
-              ? `${featureBeingHovered.properties.name} ${featureBeingHovered.properties.SUAMNLN} %`
+              ? `${featureBeingHovered.properties.name} ${featureBeingHovered.properties.SUAMN} %`
               : "Hover a district to see individual values"}
           </p>
         </div>
