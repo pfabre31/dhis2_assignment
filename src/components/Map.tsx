@@ -1,25 +1,29 @@
 import React, { useRef, useEffect, useState } from "react";
-import mapboxgl from "mapbox-gl";
+import mapboxgl, { AnyLayer } from "mapbox-gl";
 import { Layer } from "./Layer";
 import { jenks } from "simple-statistics";
+import { MapBoxMap, MapInputDataType } from "../types";
 import "mapbox-gl/dist/mapbox-gl.css";
 import "./Map.css";
+import { Feature } from "geojson";
 
 mapboxgl.accessToken =
   "pk.eyJ1IjoibGFpc3NlcGF1bCIsImEiOiJjam5ocTByd2gwZjU2M3BvM3R5NndidThkIn0.DZIEmZkAfnn7s3fTWv0JHA";
 
-export const Map = (props) => {
-  const map = useRef(null);
+export const Map = (props: MapInputDataType) => {
+  const map = useRef<MapBoxMap>(null);
   const mapContainer = useRef(null);
-  let [featureBeingHovered, setFeatureBeingHovered] = useState(null);
+  let [featureBeingHovered, setFeatureBeingHovered] = useState<Feature | null>(
+    null
+  );
 
   //Should be changed according to data
   const discretizationNbOfGroups = 3;
 
   let [discretizationStops, setDiscretizationStops] = useState(
     jenks(
-      props.dataSources["mosquito"].data.features
-        .map((f) => f.properties.SUAMN)
+      props.dataSources["mosquito" as keyof MapInputDataType].data.features
+        .map((f: GeoJSON.Feature) => f.properties?.SUAMN)
         .sort(),
       discretizationNbOfGroups
     )
@@ -33,7 +37,7 @@ export const Map = (props) => {
     if (map.current) return;
 
     map.current = new mapboxgl.Map({
-      container: mapContainer.current,
+      container: mapContainer.current as any,
       style: "mapbox://styles/mapbox/streets-v12",
       center: [-11.52, 8.51],
       zoom: 7,
@@ -41,14 +45,12 @@ export const Map = (props) => {
     map.current.on("load", () => {
       addMosquitoNetLayer();
       drawLegend();
-      map.current.addControl(
-        new mapboxgl.ScaleControl({ position: "bottom-left" })
-      );
+      map.current?.addControl(new mapboxgl.ScaleControl());
       setUpHoverEvent();
     });
   });
 
-  const addMosquitoNetLayer = () => {
+  const addMosquitoNetLayer = (): void => {
     const mosquitoSource = props.dataSources["mosquito"];
     const mosquitoLayer = Layer("mosquito-layer-1", "fill", "mosquitoSource", {
       "fill-color": {
@@ -65,14 +67,14 @@ export const Map = (props) => {
 
       "fill-outline-color": "black",
     });
-    map.current.addSource(mosquitoSource.name, {
-      type: mosquitoSource.type,
+    map.current?.addSource(mosquitoSource.name, {
+      type: mosquitoSource.type as any,
       data: mosquitoSource.data,
     });
-    map.current.addLayer(mosquitoLayer);
+    map.current?.addLayer(mosquitoLayer as AnyLayer);
   };
 
-  const drawLegend = () => {
+  const drawLegend = (): void => {
     const legend = document.getElementById("legend-container");
 
     discretizationStops.forEach((v, i) => {
@@ -94,17 +96,19 @@ export const Map = (props) => {
       item.appendChild(key);
       item.appendChild(value);
 
-      legend.appendChild(item);
+      legend?.appendChild(item);
     });
   };
 
-  const setUpHoverEvent = () => {
+  const setUpHoverEvent = (): void => {
+    if (!map.current) return;
     map.current.on("mousemove", "mosquito-layer-1", (e) => {
       //Checking that a feature is hovered and that it is not already being hovered
+      if (!map.current) return;
       if (
         e.features &&
         e.features.length > 0 &&
-        e.features[0].properties.name !== featureBeingHovered?.properties.name
+        e.features[0].properties?.name !== featureBeingHovered?.properties?.name
       ) {
         setFeatureBeingHovered(e.features[0]);
         map.current.getCanvas().style.cursor = "pointer";
@@ -112,13 +116,14 @@ export const Map = (props) => {
     });
 
     map.current.on("mouseleave", "mosquito-layer-1", (e) => {
+      if (!map.current) return;
       setFeatureBeingHovered(null);
       map.current.getCanvas().style.cursor = "";
     });
   };
 
   return (
-    <>
+    <div style={{ width: "100%", height: "100%" }}>
       <div
         ref={mapContainer}
         className="map-container"
@@ -131,7 +136,7 @@ export const Map = (props) => {
         <div id="mosquito-proportion">
           <p>
             {featureBeingHovered
-              ? `${featureBeingHovered.properties.name} ${featureBeingHovered.properties.SUAMN} %`
+              ? `${featureBeingHovered.properties?.name} ${featureBeingHovered.properties?.SUAMN} %`
               : "Hover a district to see individual values"}
           </p>
         </div>
@@ -140,6 +145,6 @@ export const Map = (props) => {
         <div className="legend-title">Proportion per district (%)</div>
         <div id="legend-container"></div>
       </div>
-    </>
+    </div>
   );
 };
